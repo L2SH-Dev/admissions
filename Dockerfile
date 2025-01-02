@@ -20,5 +20,6 @@ RUN yarn build
 # production stage
 FROM nginx:stable-alpine AS production-stage
 COPY --from=build-stage /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf/prod.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
