@@ -1,5 +1,5 @@
 services:
-    app:
+    builder:
         build:
             context: .
             dockerfile: Dockerfile
@@ -14,7 +14,7 @@ services:
             - ./nginx.conf:/etc/nginx/nginx.conf
             - dist-data:/usr/share/nginx/html
         depends_on:
-            - app
+            - builder
 
 volumes:
     dist-data:
