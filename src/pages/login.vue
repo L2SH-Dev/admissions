@@ -92,7 +92,7 @@ export default defineComponent({
         this.errorText = error.message;
         this.errorSnackbar = true;
       } else {
-        this.$router.push("/account");
+        this.$router.push("/profiles");
       }
     },
   },
