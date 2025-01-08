@@ -1,6 +1,12 @@
 <template>
   <v-container class="fill-height d-flex align-center justify-center">
-    <v-card class="pa-5" max-width="500" width="100%" :loading="loading">
+    <v-card
+      v-if="!finished"
+      class="pa-5"
+      max-width="500"
+      width="100%"
+      :loading="loading"
+    >
       <v-card-title>
         <v-btn icon color="grey" to="/" variant="text">
           <v-icon>mdi-arrow-left</v-icon>
@@ -62,6 +68,20 @@
         </v-btn>
       </v-card-actions>
     </v-card>
+    <v-card v-else elevation="0">
+      <v-card-title>Подтверждение регистрации</v-card-title>
+      <v-card-text>
+        <v-alert variant="tonal" type="success">
+          <p>
+            На почту <strong>{{ email }}</strong> отправлено письмо с
+            подтверждением.
+          </p>
+          <p>
+            Пожалуйста, перейдите по ссылке в письме для завершения регистрации.
+          </p>
+        </v-alert>
+      </v-card-text>
+    </v-card>
   </v-container>
   <v-snackbar v-model="errorSnackbar" :timeout="5000" color="error">
     {{ errorText }}
@@ -106,6 +126,7 @@ export default defineComponent({
       errorSnackbar: false,
       errorText: "",
       loading: false,
+      finished: false,
     };
   },
   methods: {
@@ -115,15 +136,11 @@ export default defineComponent({
 
       this.loading = true;
 
-      const frontendUrl = import.meta.env.VITE_FRONTEND_URL ?? "";
-      if (!frontendUrl)
-        throw new Error("VITE_FRONTEND_URL environment variable is not set");
-
       const { error } = await supabase.auth.signUp({
         email: this.email,
         password: this.password,
         options: {
-          emailRedirectTo: frontendUrl + "/account",
+          emailRedirectTo: window.location.origin + "/login",
         },
       });
 
@@ -133,7 +150,7 @@ export default defineComponent({
         this.errorText = error.message;
         this.errorSnackbar = true;
       } else {
-        this.$router.push("/account");
+        this.finished = true;
       }
     },
   },
