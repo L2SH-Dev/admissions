@@ -18,3 +18,5 @@ git commit -m 'deploy'
 git push -f git@github.com:L2SH-Dev/admissions.git main:deploy
 
 cd -
+
+rm -rf dist
