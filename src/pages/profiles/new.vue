@@ -145,7 +145,7 @@
           class="mt-4 mx-auto d-block"
           :loading="registering"
         >
-          Зарегистрироваться
+          Зарегистрировать
         </v-btn>
       </v-form>
     </v-card>
