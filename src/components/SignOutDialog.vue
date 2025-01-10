@@ -30,11 +30,12 @@ const prop = defineProps<{
   show: boolean;
 }>();
 const { show } = toRefs(prop);
+const router = useRouter();
 
 const emit = defineEmits(["update:show"]);
 
 const confirmLogout = async () => {
   await supabase.auth.signOut();
-  window.location.reload();
+  router.push("/");
 };
 </script>

@@ -45,6 +45,16 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
+  if (to.path === "/login" || to.path === "/register") {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      next({ path: "/profiles" });
+      return;
+    }
+  }
+
   next();
 });
 
