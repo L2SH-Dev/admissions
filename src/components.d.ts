@@ -12,5 +12,6 @@ declare module 'vue' {
     Regulations: typeof import('./components/Regulations.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SignOutDialog: typeof import('./components/SignOutDialog.vue')['default']
   }
 }
