@@ -1,5 +1,8 @@
 <template>
-  <v-card density="compact">
+  <v-card
+    density="compact"
+    :class="profile.approved ? 'approved-border' : 'moderation-border'"
+  >
     <div
       class="d-flex flex-sm-row flex-column pa-4 align-sm-start align-center gap-4"
     >
@@ -132,3 +135,12 @@ const avatar_url = supabase.storage
   .from("avatars")
   .getPublicUrl(props.profile.avatar);
 </script>
+
+<style>
+.approved-border {
+  border-left: 6px solid rgb(var(--v-theme-success)) !important;
+}
+.moderation-border {
+  border-left: 6px solid rgb(var(--v-theme-warning)) !important;
+}
+</style>
