@@ -92,8 +92,13 @@ export default defineComponent({
         this.errorText = error.message;
         this.errorSnackbar = true;
       } else {
-        this.$router.push("/profiles");
+        this.redirect();
       }
+    },
+    redirect() {
+      if (this.$route.query.redirect)
+        this.$router.push(this.$route.query.redirect as string);
+      else this.$router.push("/profiles");
     },
   },
 });

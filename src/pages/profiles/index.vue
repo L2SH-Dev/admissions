@@ -143,16 +143,17 @@ const loadUser = async () => {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (user) {
-    email.value = user.email ?? "";
-    if (user.created_at) {
-      created.value = formatTimestamp(user.created_at);
-    }
-    if (user.last_sign_in_at) {
-      lastSignIn.value = formatTimestamp(user.last_sign_in_at);
-    }
-  } else {
-    router.push("/login");
+  if (!user) {
+    console.error("User not found");
+    return;
+  }
+
+  email.value = user.email ?? "";
+  if (user.created_at) {
+    created.value = formatTimestamp(user.created_at);
+  }
+  if (user.last_sign_in_at) {
+    lastSignIn.value = formatTimestamp(user.last_sign_in_at);
   }
 
   userLoading.value = false;
