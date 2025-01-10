@@ -1,16 +1,30 @@
 <template>
   <v-card density="compact">
-    <v-card-title
-      class="d-flex flex-wrap gap-2 justify-space-between text-wrap align-center"
+    <div
+      class="d-flex flex-sm-row flex-column pa-4 align-sm-start align-center gap-4"
     >
-      <span class="mr-2">
-        {{ profile.last_name }} {{ profile.first_name }}
-        {{ profile.patronymic }}
-      </span>
-      <v-chip v-if="profile.approved" color="success">Подтвержден</v-chip>
-      <v-chip v-else color="warning">На модерации</v-chip>
-    </v-card-title>
-    <v-card-subtitle>{{ createdAt }}</v-card-subtitle>
+      <v-avatar
+        v-if="profile.avatar"
+        :image="avatar_url.data.publicUrl"
+        size="96"
+        class="mr-4"
+      />
+      <div class="flex-grow-1 min-width-0 text-center text-sm-start">
+        <v-card-title class="d-flex flex-column pa-0 gap-2">
+          <div class="text-wrap">
+            {{ profile.last_name }} {{ profile.first_name }}
+            {{ profile.patronymic }}
+          </div>
+          <v-chip
+            :color="profile.approved ? 'success' : 'warning'"
+            class="align-self-sm-start mt-2 align-self-center"
+          >
+            {{ profile.approved ? "Подтвержден" : "На модерации" }}
+          </v-chip>
+        </v-card-title>
+        <v-card-subtitle class="pa-0 pt-2">{{ createdAt }}</v-card-subtitle>
+      </div>
+    </div>
     <v-card-text class="pa-2">
       <v-list density="compact" class="pa-0">
         <v-row dense class="ma-0">
@@ -63,6 +77,8 @@
 </template>
 
 <script lang="ts" setup>
+import { supabase } from "@/lib/supabaseClient";
+
 export interface Profile {
   id: string;
   approved: boolean;
@@ -81,6 +97,7 @@ export interface Profile {
   source: string;
   june_exam: boolean;
   vmsh: boolean;
+  avatar: string;
 }
 
 const props = defineProps<{
@@ -110,4 +127,8 @@ const gender =
     : props.profile.gender === "F"
     ? "Женский"
     : "Не указан";
+
+const avatar_url = supabase.storage
+  .from("avatars")
+  .getPublicUrl(props.profile.avatar);
 </script>
