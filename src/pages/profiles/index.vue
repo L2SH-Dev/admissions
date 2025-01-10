@@ -191,3 +191,8 @@ const formatTimestamp = (timestamp: string) => {
   border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
 }
 </style>
+
+<route lang="yaml">
+meta:
+  layout: authed
+</route>
