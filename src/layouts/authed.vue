@@ -5,7 +5,9 @@
         <v-list-item to="/profiles" prepend-icon="mdi-account-multiple">
           Профили
         </v-list-item>
-        <v-list-item to="/chat" prepend-icon="mdi-chat">Поддержка</v-list-item>
+        <v-list-item to="/support" prepend-icon="mdi-chat-question">
+          Поддержка
+        </v-list-item>
         <v-list-item to="/exams" prepend-icon="mdi-file-document">
           Экзамены
         </v-list-item>
@@ -27,7 +29,7 @@
           <v-btn to="/exams" prepend-icon="mdi-file-document" class="mx-2">
             Экзамены
           </v-btn>
-          <v-btn to="/chat" prepend-icon="mdi-chat" class="mx-2">
+          <v-btn to="/support" prepend-icon="mdi-chat-question" class="mx-2">
             Поддержка
           </v-btn>
         </div>
