@@ -96,13 +96,10 @@
           :rules="[(v) => !!v || 'Введите источник']"
           required
         />
-        <v-file-input
-          disabled
-          label="Загрузите фото поступающего"
-          prepend-icon="mdi-camera"
-          accept="image/*"
-          required
-          class="mt-4"
+        <AvatarUpload
+          :size="100"
+          class="mb-4 mt-2"
+          @change:file="avatar = $event"
         />
         <v-checkbox
           :rules="[(v) => !!v || 'Необходимо ознакомиться с положением']"
@@ -188,6 +185,7 @@ export default defineComponent({
         "Узнал из социальных сетей",
         "Другое",
       ],
+      avatar: null as File | null,
       errorSnackbar: false,
       errorText: "",
       registering: false,
@@ -233,40 +231,43 @@ export default defineComponent({
     async handleSubmit() {
       const isValid = await (this.$refs.form as VForm).validate();
       if (!isValid.valid) return;
+      if (!this.checkAvatar()) return;
 
       this.registering = true;
 
-      const { error } = await supabase
-        .from("profiles")
-        .insert([
-          {
-            first_name: this.first_name,
-            last_name: this.last_name,
-            patronymic: this.patronymic,
-            gender: this.formattedGender,
-            birth_date: this.birth_date,
-            grade: this.grade,
-            old_school: this.old_school,
-            parent_first_name: this.parent_first_name,
-            parent_last_name: this.parent_last_name,
-            parent_patronymic: this.parent_patronymic,
-            parent_phone: this.parent_phone,
-            june_exam: this.june_exam,
-            vmsh: this.vmsh,
-            source: this.source,
-          },
-        ])
-        .select();
-
-      if (error) {
-        this.errorText = error.message;
-        this.errorSnackbar = true;
-      } else {
-        this.finished = true;
+      try {
+        const avatar_path = await this.uploadAvatar();
+        const { error } = await supabase
+          .from("profiles")
+          .insert([
+            {
+              first_name: this.first_name,
+              last_name: this.last_name,
+              patronymic: this.patronymic,
+              gender: this.formattedGender,
+              birth_date: this.birth_date,
+              grade: this.grade,
+              old_school: this.old_school,
+              parent_first_name: this.parent_first_name,
+              parent_last_name: this.parent_last_name,
+              parent_patronymic: this.parent_patronymic,
+              parent_phone: this.parent_phone,
+              june_exam: this.june_exam,
+              vmsh: this.vmsh,
+              source: this.source,
+              avatar: avatar_path,
+            },
+          ])
+          .select();
+        if (error) throw error;
         this.$router.push("/profiles");
+      } catch (error) {
+        this.errorText =
+          error instanceof Error ? error.message : "Неизвестная ошибка";
+        this.errorSnackbar = true;
+      } finally {
+        this.registering = false;
       }
-
-      this.registering = false;
     },
     updateSource(value: string | null) {
       if (!value || value === "Другое") {
@@ -277,6 +278,30 @@ export default defineComponent({
     },
     openRulesDialog() {
       this.rulesDialog = true;
+    },
+    checkAvatar() {
+      if (!this.avatar) {
+        this.errorText = "Необходимо загрузить фото поступающего.";
+        this.errorSnackbar = true;
+        return false;
+      }
+      return true;
+    },
+    async uploadAvatar() {
+      if (!this.avatar) return;
+
+      const fileExt = this.avatar.name.split(".").pop();
+      const filePath = `${Math.random()
+        .toString(36)
+        .substring(2)}${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, this.avatar);
+
+      if (uploadError) throw uploadError;
+
+      return filePath;
     },
   },
 });
