@@ -117,9 +117,9 @@
 </template>
 
 <script lang="ts" setup>
-import type { Profile } from "@/components/ProfileRegistration.vue";
 import { supabase } from "@/lib/supabaseClient";
 import router from "@/router";
+import type { Profile } from "@/stores/app";
 import { ref } from "vue";
 import { useTheme } from "vuetify";
 
@@ -160,7 +160,10 @@ const loadUser = async () => {
 };
 
 const loadProfiles = async () => {
-  const { data, error } = await supabase.from("profiles").select("*");
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .order("approved", { ascending: false });
 
   if (error) {
     console.error(error);
