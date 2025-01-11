@@ -1,5 +1,13 @@
 <template>
-  <v-card density="compact" :class="{ 'moderation-border': !profile.approved }">
+  <v-card
+    density="compact"
+    :class="{
+      'profile-card-moderation': !profile.approved,
+      'profile-card-approved': profile.approved,
+      'profile-card-selected': store.profile?.id === profile.id,
+    }"
+    @click="selectProfile"
+  >
     <div
       class="d-flex flex-sm-row flex-column pa-4 align-sm-start align-center gap-4"
     >
@@ -78,31 +86,13 @@
 
 <script lang="ts" setup>
 import { supabase } from "@/lib/supabaseClient";
-
-export interface Profile {
-  id: string;
-  approved: boolean;
-  birth_date: string;
-  created_at: string;
-  first_name: string;
-  last_name: string;
-  patronymic: string | null;
-  gender: string | null;
-  grade: number;
-  old_school: string;
-  parent_first_name: string;
-  parent_last_name: string;
-  parent_patronymic: string | null;
-  parent_phone: string;
-  source: string;
-  june_exam: boolean;
-  vmsh: boolean;
-  avatar: string;
-}
+import { useAppStore, type Profile } from "@/stores/app";
 
 const props = defineProps<{
   profile: Profile;
 }>();
+
+const store = useAppStore();
 
 const createdAt = new Date(props.profile.created_at).toLocaleString("ru-RU", {
   year: "numeric",
@@ -131,10 +121,31 @@ const gender =
 const avatar_url = supabase.storage
   .from("avatars")
   .getPublicUrl(props.profile.avatar);
+
+const selectProfile = () => {
+  if (!props.profile.approved) return;
+  store.setProfile(props.profile);
+};
 </script>
 
-<style>
-.moderation-border {
+<style scoped>
+.profile-card-moderation {
   border-left: 6px solid rgb(var(--v-theme-warning)) !important;
+  pointer-events: none !important;
+}
+
+.profile-card-approved {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out,
+    border 0.2s ease-in-out;
+}
+
+.profile-card-approved:hover {
+  border: 2px solid rgb(var(--v-theme-success)) !important;
+  transform: scale(1.005);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.profile-card-selected {
+  border: 2px solid rgb(var(--v-theme-primary)) !important;
 }
 </style>
