@@ -2,14 +2,12 @@
   <v-container class="d-flex flex-column pa-0 fill-height" max-width="800">
     <div class="flex-grow-1 position-relative w-100">
       <v-virtual-scroll
-        ref="messagesContainer"
         :items="messages"
         class="px-4 pt-4 messages-container w-100"
         style="height: calc(100vh - 135px)"
       >
         <template #default="{ item }">
           <div
-            ref="lastMessage"
             :class="[
               'd-flex mb-4',
               item.sent ? 'justify-end' : 'justify-start',
@@ -64,7 +62,6 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-import { VVirtualScroll } from "vuetify/components";
 
 interface ChatMessage {
   text: string;
@@ -84,8 +81,6 @@ const messages = ref<ChatMessage[]>([
   { text: "Спасибо!", sent: true },
 ]);
 const newMessage = ref("");
-const messagesContainer = ref<InstanceType<typeof VVirtualScroll> | null>(null);
-const lastMessage = ref<HTMLElement | null>(null);
 
 const sendMessage = () => {
   if (!newMessage.value.trim()) return;
@@ -95,17 +90,6 @@ const sendMessage = () => {
     sent: true,
   });
   newMessage.value = "";
-
-  setTimeout(() => {
-    const container = messagesContainer.value?.$el;
-    const lastMsg = lastMessage.value;
-    if (container && lastMsg) {
-      container.scrollTo({
-        top: lastMsg.offsetTop + lastMsg.offsetHeight,
-        behavior: "smooth",
-      });
-    }
-  }, 50);
 };
 </script>
 
