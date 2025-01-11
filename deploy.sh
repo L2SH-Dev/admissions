@@ -8,8 +8,8 @@ cd dist
 
 cp index.html 404.html
 
-# if you are deploying to a custom domain
-# echo 'www.example.com' > CNAME
+# deploying to a custom domain
+echo 'l2sh-admissions.ru' > CNAME
 
 git init
 git add -A
