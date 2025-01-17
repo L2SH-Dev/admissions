@@ -4,6 +4,6 @@
     :text="$route.fullPath"
     title="Страница не найдена"
     action-text="На главную"
-    @click:action="() => $router.push('/')"
+    @click:action="() => $router.push('/profile')"
   />
 </template>
