@@ -12,7 +12,7 @@
         <v-list-item
           title="Регистрации"
           prepend-icon="mdi-format-list-bulleted"
-          disabled
+          to="/registrations"
         />
         <v-list-item
           title="Экзамены"
