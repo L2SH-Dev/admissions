@@ -71,6 +71,7 @@ export const useProfileStore = defineStore("profile", {
 
 export interface Profile {
   id: string;
+  user_id: string;
   approved: boolean;
   birth_date: string;
   created_at: string;

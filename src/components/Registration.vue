@@ -79,7 +79,7 @@
     </v-card-text>
 
     <v-dialog v-model="approveDialog" width="auto">
-      <v-card>
+      <v-card :disabled="loading" :loading="loading">
         <v-card-title>Подтверждение</v-card-title>
         <v-card-text>
           Вы уверены, что хотите одобрить заявку "{{ profile.last_name }}
@@ -93,7 +93,7 @@
     </v-dialog>
 
     <v-dialog v-model="rejectDialog" width="auto">
-      <v-card>
+      <v-card :disabled="loading" :loading="loading">
         <v-card-title>Подтверждение</v-card-title>
         <v-card-text>
           <p class="mb-4">
@@ -129,6 +129,7 @@ const props = defineProps<{
 
 const emit = defineEmits(["update"]);
 
+const loading = ref(false);
 const approveDialog = ref(false);
 const rejectDialog = ref(false);
 const rejectReason = ref("");
@@ -163,11 +164,15 @@ const handleApprove = () => {
 };
 
 const confirmApprove = async () => {
+  loading.value = true;
+
   const { error } = await supabase
     .from("profiles")
     .update({ approved: true })
     .eq("id", props.profile.id);
+
   approveDialog.value = false;
+  loading.value = false;
 
   if (error) console.error("Error approving profile:", error.message);
   else emit("update");
@@ -178,15 +183,84 @@ const handleReject = async () => {
 };
 
 const confirmReject = async () => {
+  loading.value = true;
+
+  await deleteAvatar();
+  await deleteProfile();
+  sendRejectionEmail(rejectReason.value);
+  closeRejectDialog();
+
+  loading.value = false;
+};
+
+const deleteAvatar = async () => {
+  const { error } = await supabase.storage
+    .from("avatars")
+    .remove([props.profile.avatar]);
+  if (error) console.error("Error deleting avatar:", error.message);
+};
+
+const deleteProfile = async () => {
   const { error } = await supabase
     .from("profiles")
     .delete()
     .eq("id", props.profile.id);
-  rejectDialog.value = true;
-
-  if (error) console.error("Error rejecting profile:", error.message);
+  if (error) console.error("Error deleting profile:", error.message);
   else emit("update");
-  rejectDialog.value = false;
+};
+
+const sendRejectionEmail = async (reason: string) => {
+  const user_id = props.profile.user_id;
+  const { data: email, error: email_error } = await supabase.rpc(
+    "get_user_email",
+    { user_id }
+  );
+  if (email_error) {
+    console.error("Error getting user email:", email_error.message);
+    return;
+  }
+  const { error } = await supabase.functions.invoke("sendRejectionEmail", {
+    body: {
+      email,
+      rejectionReason: reason,
+      profileData: [
+        { fieldName: "Фамилия", value: props.profile.last_name },
+        { fieldName: "Имя", value: props.profile.first_name },
+        { fieldName: "Отчество", value: props.profile.patronymic },
+        { fieldName: "Дата рождения", value: birthDate },
+        { fieldName: "Класс поступления", value: props.profile.grade },
+        {
+          fieldName: "Пол",
+          value:
+            props.profile.gender === null
+              ? "Не указан"
+              : props.profile.gender === "M"
+              ? "Мужской"
+              : "Женский",
+        },
+        { fieldName: "Телефон родителя", value: props.profile.parent_phone },
+        {
+          fieldName: "Фамилия родителя",
+          value: props.profile.parent_last_name,
+        },
+        { fieldName: "Имя родителя", value: props.profile.parent_first_name },
+        {
+          fieldName: "Отчество родителя",
+          value: props.profile.parent_patronymic,
+        },
+        { fieldName: "Предыдущая школа", value: props.profile.old_school },
+        {
+          fieldName: "ВМШ",
+          value: props.profile.vmsh ? "Посещал" : "Не посещал",
+        },
+        {
+          fieldName: "Экзамен в июне",
+          value: props.profile.june_exam ? "Да" : "Нет",
+        },
+      ],
+    },
+  });
+  if (error) console.error("Error sending rejection email:", error.message);
 };
 
 const closeRejectDialog = () => {
