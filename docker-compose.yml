@@ -463,4 +463,9 @@ services:
         type: bind
         source: ./confirmation.html
         target: /usr/share/nginx/html/confirmation.html
-        content: '<h1>CONFIRMATION EMAIL TEMPLATE #2</h1>'
+        content: '<h1>CONFIRMATION EMAIL TEMPLATE</h1>'
+      -
+        type: bind
+        source: ./profile-rejection.html
+        target: /usr/share/nginx/html/profile-rejection.html
+        content: '<h1>PROFILE REJECTION EMAIL TEMPLATE</h1>'
