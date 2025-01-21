@@ -109,3 +109,7 @@ Copy and paste SQL queries to the Supabase SQL editor.
 
 - `tables/profiles.sql`
 - `tables/user_roles.sql`
+
+### RLS Policies
+
+SQL queries for Row Level Security policies are located in the `policies` directory. 
