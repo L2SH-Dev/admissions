@@ -121,3 +121,7 @@ Copy and paste SQL queries to the Supabase SQL editor.
 ### RLS Policies
 
 SQL queries for Row Level Security policies are located in the `policies` directory. 
+
+### Storage polices
+
+SQL queries for storage policies are located in the `storage-policies` directory.
