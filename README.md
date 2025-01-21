@@ -96,3 +96,16 @@ SERVICE_SUPABASEANON_KEY=
 SERVICE_SUPABASESERVICE_KEY=
 SERVICE_USER_ADMIN=
 ```
+
+## Types & Tables
+
+Copy and paste SQL queries to the Supabase SQL editor.
+
+### Types
+
+- `types/app_role.sql`
+
+### Tables
+
+- `tables/profiles.sql`
+- `tables/user_roles.sql`
