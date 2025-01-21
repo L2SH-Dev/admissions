@@ -10,25 +10,29 @@ Deno.serve(async (req: Request) => {
     }
 
     const body = await req.json();
+    const email = body.email;
     const rejectionReason = body.rejectionReason;
     const profileData = body.profileData;
 
-    // TODO: Get the email of the user from the profile data
-    // TODO: Create rejection email template
-    // TODO: Rename function to sendRejectionEmail
+    if (!email || !rejectionReason || !profileData) {
+      return new Response(
+        JSON.stringify({
+          error: "Missing required fields: email, rejectionReason, profileData",
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+          status: 400,
+        }
+      );
+    }
 
     const html = await getEmailHtml(rejectionReason, profileData);
+    await sendEmail(email, html);
 
-    // await sendEmail(html);
-
-    // return new Response(JSON.stringify({ message: "Email sent" }), {
-    return new Response(
-      JSON.stringify({ reason: rejectionReason, profile: profileData }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 200,
-      }
-    );
+    return new Response(JSON.stringify({ message: "Email sent" }), {
+      headers: { "Content-Type": "application/json" },
+      status: 200,
+    });
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { "Content-Type": "application/json" },
@@ -72,20 +76,28 @@ const isUserAdmin = async (user: any, supabase: any) => {
 
 const getEmailHtml = async (rejectionReason: string, profileData: any) => {
   const rawHtml = await fetch(
-    "https://sbnginx.l2sh-admissions.ru/confirmation.html"
+    "https://sbnginx.l2sh-admissions.ru/profile-rejection.html"
   ).then((res) => res.text());
 
   return rawHtml
     .replace("{{ .RejectionReason }}", rejectionReason)
-    .replace("{{ .ProfileData }}", JSON.stringify(profileData, null, 2));
+    .replace("{{ .ProfileData }}", prettifyProfileData(profileData));
 };
 
-const sendEmail = async (html: string) => {
+const prettifyProfileData = (profileData: any) => {
+  return profileData
+    .map((field: any) => {
+      return `<tr><td>${field.fieldName}</td><td>${field.value}</td></tr>`;
+    })
+    .join("");
+};
+
+const sendEmail = async (email: string, html: string) => {
   const formdata = new FormData();
   formdata.append("name", 'Лицей "Вторая школа"');
   formdata.append("from", "admin@l2sh-admissions.ru");
-  formdata.append("subject", "Заявка отклонена");
-  formdata.append("to", "grisha.koganovskiy@gmail.com");
+  formdata.append("subject", "Регистрация профиля отклонена");
+  formdata.append("to", email);
   formdata.append("html", html);
 
   const SMTP_API_URL = Deno.env.get("SMTP_API_URL") ?? "";
