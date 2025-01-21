@@ -19,12 +19,16 @@ Deno.serve(async (req: Request) => {
 
     const html = await getEmailHtml(rejectionReason, profileData);
 
-    await sendEmail(html);
+    // await sendEmail(html);
 
-    return new Response(JSON.stringify({ message: "Email sent" }), {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    });
+    // return new Response(JSON.stringify({ message: "Email sent" }), {
+    return new Response(
+      JSON.stringify({ reason: rejectionReason, profile: profileData }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      }
+    );
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { "Content-Type": "application/json" },
