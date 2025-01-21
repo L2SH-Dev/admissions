@@ -21,9 +21,17 @@ Destination: `/usr/share/nginx/html/confirmation.html`
 
 #### Send rejection email
 
-Source: `functions/sendRejectionEmail/index.ts`  
+Source: `edge-functions/sendRejectionEmail/index.ts`  
 Container: `supabase-edge-functions`  
 Destination: `/home/deno/functions/sendRejectionEmail/index.ts`
+
+### Database Functions
+
+Database functions have to be created manually in the Supabase editor.
+
+#### Get user email
+
+Source: `database-functions/get_user_email.sql`
 
 ## Environment Variables
 
