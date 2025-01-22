@@ -17,7 +17,7 @@
         <v-list-item
           title="Экзамены"
           prepend-icon="mdi-file-document"
-          disabled
+          to="/exams"
         />
         <v-list-item title="Результаты" prepend-icon="mdi-chart-bar" disabled />
         <v-list-item title="Показ работ" prepend-icon="mdi-eye" disabled />
