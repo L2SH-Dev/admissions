@@ -32,7 +32,9 @@
         />
       </div>
     </v-card-title>
-    <v-card-subtitle>{{ createdAt }}</v-card-subtitle>
+    <v-card-subtitle class="text-center text-sm-left">
+      {{ createdAt }}
+    </v-card-subtitle>
     <v-card-text class="pa-2">
       <v-list density="compact" class="pa-0">
         <v-row dense class="ma-0">
