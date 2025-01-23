@@ -1,4 +1,3 @@
-// Utilities
 import { supabase } from "@/lib/supabaseClient";
 import { defineStore } from "pinia";
 
