@@ -51,7 +51,14 @@
             </div>
           </v-col>
         </v-row>
-        <p>{{ exam.annotation }}</p>
+
+        <v-row>
+          <v-col>
+            <v-list-item>
+              {{ exam.annotation }}
+            </v-list-item>
+          </v-col>
+        </v-row>
 
         <v-switch
           v-model="registration_is_open"
@@ -64,21 +71,12 @@
         />
       </v-card-text>
 
-      <!-- <v-btn
-        color="primary"
-        :icon="$vuetify.display.xs"
-        variant="tonal"
-        @click="store.load"
-      >
-        <v-icon>mdi-refresh</v-icon>
-        <span class="d-none d-sm-inline ml-2">Обновить</span>
-      </v-btn> -->
-
       <v-card-actions class="d-flex justify-end">
         <v-btn
           color="primary"
           variant="text"
           :icon="$vuetify.display.xs"
+          disabled
           @click="editExam"
         >
           <v-icon>mdi-pencil</v-icon>
