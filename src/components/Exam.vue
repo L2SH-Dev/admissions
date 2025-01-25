@@ -114,7 +114,6 @@
 <script lang="ts" setup>
 import { supabase } from "@/lib/supabaseClient";
 import type { Exam } from "@/stores/exam";
-import { defineProps } from "vue";
 
 const props = defineProps<{
   exam: Exam;
