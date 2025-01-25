@@ -29,8 +29,7 @@
       </v-tabs-window-item>
 
       <v-tabs-window-item value="create">
-        <!-- <CreateExam @exam-created="examCreated" /> -->
-        <h1>create</h1>
+        <CreateExam @update="examCreated" />
       </v-tabs-window-item>
     </v-tabs-window>
   </v-container>
@@ -43,10 +42,10 @@ const store = useExamStore();
 
 const activeTab = ref("list");
 
-// const examCreated = () => {
-//   activeTab.value = "list";
-//   statusChanged();
-// };
+const examCreated = () => {
+  activeTab.value = "list";
+  store.load();
+};
 
 onMounted(() => {
   store.load();
