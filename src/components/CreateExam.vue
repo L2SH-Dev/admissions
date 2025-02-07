@@ -6,7 +6,7 @@
           v-model="formattedSelectedDate"
           label="Дата проведения"
           prepend-icon="mdi-calendar"
-          :rules="[(v) => !!selectedDate || 'Выберите дату']"
+          :rules="[(v: string) => !!selectedDate || 'Выберите дату']"
           :active="datePickerDialog"
           readonly
         >
@@ -35,7 +35,7 @@
               'Неверный формат времени (ЧЧ:ММ)',
             (v: string) =>
               isStartTimeValid ||
-              'Время начала должно быть раньше времени окончания',
+              'Время начала должно быть раньше времени окончания'
           ]"
         />
       </v-col>
@@ -53,7 +53,7 @@
               'Неверный формат времени (ЧЧ:ММ)',
             (v: string) =>
               isEndTimeValid ||
-              'Время окончания должно быть позже времени начала',
+              'Время окончания должно быть позже времени начала'
           ]"
         />
       </v-col>
@@ -66,11 +66,11 @@
       min="1"
       max="999"
       :rules="[
-        (v) => !!v || 'Введите количество мест',
-        (v) => v > 0 || 'Количество мест должно быть больше 0',
-        (v) => v <= 999 || 'Максимальное количество мест - 999',
-        (v) =>
-          Number.isInteger(v) || 'Количество мест должно быть целым числом',
+        (v: number) => !!v || 'Введите количество мест',
+        (v: number) => v > 0 || 'Количество мест должно быть больше 0',
+        (v: number) => v <= 999 || 'Максимальное количество мест - 999',
+        (v: number) =>
+          Number.isInteger(v) || 'Количество мест должно быть целым числом'
       ]"
       required
     />
@@ -79,7 +79,7 @@
       v-model="formGrade"
       :items="grades"
       label="Класс"
-      :rules="[(v) => !!v || 'Выберите класс']"
+      :rules="[(v: number) => !!v || 'Выберите класс']"
       required
     />
 
@@ -91,7 +91,7 @@
       item-title="title"
       item-value="id"
       label="Тип экзамена"
-      :rules="[(v) => !!v || 'Выберите тип экзамена']"
+      :rules="[(v: number) => !!v || 'Выберите тип экзамена']"
       required
     />
 
@@ -101,14 +101,14 @@
           v-model="selectedPredefinedAnnotation"
           :items="predefinedAnnotations"
           label="Сообщение"
-          :rules="[(v) => !!v || 'Выберите сообщение']"
+          :rules="[(v: string) => !!v || 'Выберите сообщение']"
           required
           hide-details
         >
           <template #item="{ props, item }">
             <v-list-item v-bind="props" title="">
               <v-list-item-title class="text-wrap">
-                {{ item.raw }}
+                {{ item.title }}
               </v-list-item-title>
             </v-list-item>
           </template>
@@ -147,9 +147,9 @@
   </v-form>
 </template>
 
-<script lang="ts" setup>
+<script lang="ts">
+import { defineComponent } from "vue";
 import { supabase } from "@/lib/supabaseClient";
-import { ref, computed, watch, onMounted } from "vue";
 import type { VForm } from "vuetify/components";
 
 interface ExamType {
@@ -157,119 +157,127 @@ interface ExamType {
   title: string;
 }
 
-const emit = defineEmits(["update"]);
+export default defineComponent({
+  name: "ExamForm",
+  emits: ["update"],
+  data() {
+    return {
+      // Date and time fields
+      selectedDate: null as string | null,
+      datePickerDialog: false,
+      start: "10:00",
+      end: "12:00",
 
-// Form ref
-const form = ref<VForm | null>(null);
+      // Annotation fields
+      selectedPredefinedAnnotation: null as string | null,
+      predefinedAnnotations: [
+        "Сбор в холле нового здания за 30 минут до начала экзамена. Возьмите ручки!",
+        "Сбор в холле старого здания за 30 минут до начала экзамена. Возьмите ручки!",
+        "Другое",
+      ],
+      formAnnotation: "",
 
-// Date and time fields
-const selectedDate = ref<string | null>(null);
-const datePickerDialog = ref(false);
-const start = ref("10:00");
-const end = ref("12:00");
+      // Other form fields
+      formCapacity: 30,
+      formGrade: 6,
+      grades: [6, 7, 8, 9, 10, 11],
+      examTypes: [] as ExamType[],
+      formTypeId: 0,
+      registrationIsOpen: true,
+    };
+  },
+  computed: {
+    formattedSelectedDate(): string {
+      return this.selectedDate
+        ? new Date(this.selectedDate).toLocaleDateString("ru-RU")
+        : "";
+    },
+    showCustomAnnotation(): boolean {
+      return this.selectedPredefinedAnnotation === "Другое";
+    },
+    isStartTimeValid(): boolean {
+      if (!this.start || !this.end) return true;
+      return (
+        this.parseTimeToMinutes(this.start) < this.parseTimeToMinutes(this.end)
+      );
+    },
+    isEndTimeValid(): boolean {
+      if (!this.start || !this.end) return true;
+      return (
+        this.parseTimeToMinutes(this.end) > this.parseTimeToMinutes(this.start)
+      );
+    },
+  },
+  watch: {
+    selectedPredefinedAnnotation(newVal: string | null) {
+      if (newVal && newVal !== "Другое") {
+        this.formAnnotation = newVal;
+      } else {
+        this.formAnnotation = "";
+      }
+    },
+  },
+  mounted() {
+    this.loadExamTypes();
+  },
+  methods: {
+    parseTimeToMinutes(time: string): number {
+      if (!time) return 0;
+      const [hours, minutes] = time.split(":").map(Number);
+      return hours * 60 + minutes;
+    },
+    async loadExamTypes() {
+      const { data: exam_types, error } = await supabase
+        .from("exam_types")
+        .select("id,title");
+      if (error) {
+        console.error("Error loading exam types:", error);
+        return;
+      }
+      this.examTypes = exam_types || [];
+      if (this.examTypes.length > 0) {
+        this.formTypeId = this.examTypes[0].id;
+      }
+    },
+    async handleSubmit() {
+      // Access the form via $refs (the <v-form ref="form" /> in the template)
+      const form = this.$refs.form as VForm;
+      if (!form) return;
 
-// Annotation fields
-const selectedPredefinedAnnotation = ref<string | null>(null);
-const predefinedAnnotations = [
-  "Сбор в холле нового здания за 30 минут до начала экзамена. Возьмите ручки!",
-  "Сбор в холле старого здания за 30 минут до начала экзамена. Возьмите ручки!",
-  "Другое",
-];
-const formAnnotation = ref("");
+      const isValid = await form.validate();
+      if (!isValid.valid) return;
 
-// Other form fields
-const formCapacity = ref(30);
-const formGrade = ref(6);
-const grades = [6, 7, 8, 9, 10, 11];
-const examTypes = ref<ExamType[]>([]);
-const formTypeId = ref(0);
-const registrationIsOpen = ref(true);
+      // Assuming formattedSelectedDate is in "dd.mm.yyyy" format
+      const parts = this.formattedSelectedDate.split(".");
+      if (parts.length !== 3) {
+        console.error("Invalid date format");
+        return;
+      }
+      const [day, month, year] = parts;
 
-// Computed properties
-const formattedSelectedDate = computed(() => {
-  return selectedDate.value
-    ? new Date(selectedDate.value).toLocaleDateString("ru-RU")
-    : "";
+      const { data, error } = await supabase
+        .from("exams")
+        .insert([
+          {
+            date: `${year}-${month}-${day}`,
+            start_time: this.start,
+            end_time: this.end,
+            capacity: this.formCapacity,
+            grade: this.formGrade,
+            exam_type_id: this.formTypeId,
+            registration_is_open: this.registrationIsOpen,
+            annotation: this.formAnnotation,
+          },
+        ])
+        .select();
+
+      if (error) {
+        console.error("Error creating an exam:", error);
+      } else {
+        console.info("Exam created:", data);
+        this.$emit("update");
+      }
+    },
+  },
 });
-
-const showCustomAnnotation = computed(() => {
-  return selectedPredefinedAnnotation.value === "Другое";
-});
-
-const parseTimeToMinutes = (time: string) => {
-  if (!time) return 0;
-  const [hours, minutes] = time.split(":").map(Number);
-  return hours * 60 + minutes;
-};
-
-const isStartTimeValid = computed(() => {
-  if (!start.value || !end.value) return true;
-  return parseTimeToMinutes(start.value) < parseTimeToMinutes(end.value);
-});
-
-const isEndTimeValid = computed(() => {
-  if (!start.value || !end.value) return true;
-  return parseTimeToMinutes(end.value) > parseTimeToMinutes(start.value);
-});
-
-// Watchers
-watch(selectedPredefinedAnnotation, (newVal) => {
-  if (newVal && newVal !== "Другое") {
-    formAnnotation.value = newVal;
-  } else {
-    formAnnotation.value = "";
-  }
-});
-
-// Mock exam types loading
-onMounted(async () => {
-  const loadedTypes = await loadExamTypes();
-  if (loadedTypes) {
-    examTypes.value = loadedTypes;
-    if (examTypes.value.length > 0) {
-      formTypeId.value = examTypes.value[0].id;
-    }
-  }
-});
-
-const loadExamTypes = async () => {
-  const { data: exam_types, error } = await supabase
-    .from("exam_types")
-    .select("id,title");
-  if (error) {
-    console.error("Error loading exam types:", error);
-    return null;
-  }
-  return exam_types || [];
-};
-
-// Submit handler
-const handleSubmit = async () => {
-  const isValid = await form.value?.validate();
-  if (!isValid?.valid) return;
-
-  const [day, month, year] = formattedSelectedDate.value.split(".");
-
-  const { data, error } = await supabase
-    .from("exams")
-    .insert([
-      {
-        date: `${year}-${month}-${day}`,
-        start_time: start.value,
-        end_time: end.value,
-        capacity: formCapacity.value,
-        grade: formGrade.value,
-        exam_type_id: formTypeId.value,
-        registration_is_open: registrationIsOpen.value,
-        annotation: formAnnotation.value,
-      },
-    ])
-    .select();
-
-  if (error) console.error("Error creating an exam:", error);
-  else {
-    console.info("Exam created:", data);
-    emit("update");
-  }
-};
 </script>
