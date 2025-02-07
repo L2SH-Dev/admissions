@@ -95,10 +95,32 @@ export default defineComponent({
         this.redirect();
       }
     },
-    redirect() {
+    async redirect() {
+      if (await this.checkAdmin()) {
+        console.warn("Admins are not allowed to login");
+        await supabase.auth.signOut();
+      }
       if (this.$route.query.redirect)
         this.$router.push(this.$route.query.redirect as string);
       else this.$router.push("/profiles");
+    },
+    async checkAdmin() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return false;
+
+      const { data: user_roles, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      if (error) {
+        console.error(error);
+        return false;
+      }
+
+      if (!user_roles.some((role) => role.role === "admin")) return false;
+      return true;
     },
   },
 });
