@@ -25,6 +25,7 @@
 
 <script lang="ts" setup>
 import { supabase } from "@/lib/supabaseClient";
+import { useProfileStore } from "@/stores/profile";
 
 const prop = defineProps<{
   show: boolean;
@@ -34,8 +35,11 @@ const router = useRouter();
 
 const emit = defineEmits(["update:show"]);
 
+const profileStore = useProfileStore();
+
 const confirmLogout = async () => {
   await supabase.auth.signOut();
+  profileStore.clearProfileID();
   router.push("/");
 };
 </script>
