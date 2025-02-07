@@ -86,13 +86,13 @@
 
 <script lang="ts" setup>
 import { supabase } from "@/lib/supabaseClient";
-import { useAppStore, type Profile } from "@/stores/app";
+import { useProfileStore, type Profile } from "@/stores/profile";
 
 const props = defineProps<{
   profile: Profile;
 }>();
 
-const store = useAppStore();
+const store = useProfileStore();
 
 const createdAt = new Date(props.profile.created_at).toLocaleString("ru-RU", {
   year: "numeric",

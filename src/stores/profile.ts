@@ -1,7 +1,7 @@
 // Utilities
 import { defineStore } from "pinia";
 
-export const useAppStore = defineStore("app", {
+export const useProfileStore = defineStore("profile", {
   persist: true,
   state: () => ({
     profile: null as Profile | null,

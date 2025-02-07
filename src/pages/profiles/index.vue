@@ -119,7 +119,7 @@
 <script lang="ts" setup>
 import { supabase } from "@/lib/supabaseClient";
 import router from "@/router";
-import type { Profile } from "@/stores/app";
+import type { Profile } from "@/stores/profile";
 import { ref } from "vue";
 import { useTheme } from "vuetify";
 

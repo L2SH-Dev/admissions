@@ -126,10 +126,10 @@
 import { useRouter } from "vue-router";
 import { ref, computed } from "vue";
 import { useTheme } from "vuetify";
-import { useAppStore } from "@/stores/app";
+import { useProfileStore } from "@/stores/profile";
 import { supabase } from "@/lib/supabaseClient";
 
-const store = useAppStore();
+const store = useProfileStore();
 
 const router = useRouter();
 const drawer = ref(false);
