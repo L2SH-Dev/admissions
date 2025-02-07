@@ -44,7 +44,6 @@
 
 <script lang="ts" setup>
 import { useRouter } from "vue-router";
-import { ref } from "vue";
 import { useDisplay } from "vuetify";
 
 const { smAndDown } = useDisplay();

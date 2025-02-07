@@ -71,7 +71,6 @@
 
 <script lang="ts" setup>
 import { useTheme } from "vuetify";
-import { ref } from "vue";
 import { supabase } from "@/lib/supabaseClient";
 
 let userId: string | null = null;
